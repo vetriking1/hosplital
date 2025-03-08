@@ -5,6 +5,10 @@ const cors = require("cors");
 const patientRoute = require("./routes/patients");
 const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
+const nurseRoute = require("./routes/nurse");
+const doctorRoute = require("./routes/doctor");
+const billRoute = require("./routes/bill");
+const labTechRoute = require("./routes/lab");
 // Connect to MongoDB
 dotenv.config();
 const app = express();
@@ -20,6 +24,10 @@ app.use(express.json());
 app.use("/patients", patientRoute);
 app.use("/users", userRoute);
 app.use("/auth", authRoute);
+app.use("/nurse", nurseRoute);
+app.use("/doctors", doctorRoute);
+app.use("/biller", billRoute);
+app.use("/labTech", labTechRoute);
 
 const port = 3000;
 

@@ -8,6 +8,7 @@ const StaffSchema = new mongoose.Schema(
     Contact_Number: { type: String, required: true },
     Shift_Timing: { type: String, required: true },
     Assigned_Department: { type: String, required: true },
+    Attendance_Status: { type: String, required: true },
   },
   { collection: "staff" }
 );

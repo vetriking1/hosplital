@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
       Age,
       Gender,
       Contact_Number,
-      Address,  
+      Address,
       Blood_Group,
       Admission_Status,
     } = req.body;
@@ -55,6 +55,17 @@ router.get("/:id", async (req, res) => {
     }
 
     res.status(200).json(patient);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Get all patients
+router.get("/", async (req, res) => {
+  try {
+    const patients = await Patient.find();
+    res.status(200).json(patients);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
