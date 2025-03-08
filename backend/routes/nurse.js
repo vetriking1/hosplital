@@ -3,6 +3,7 @@ const staff = require("../models/Staff");
 const router = express.Router();
 const doctor = require("../models/Doctor");
 const patient = require("../models/Patient");
+const medicalRecords = require("../models/MedicalRecords");
 
 const axios = require("axios");
 
@@ -64,6 +65,56 @@ router.post("/assign-patient", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Create new medical record
+router.post("/create-medical-record", async (req, res) => {
+  try {
+    const { patientId, doctorId } = req.body;
+
+    // Find doctor by _id to get Doctor_ID
+    const doctorDoc = await doctor.findById(doctorId);
+    if (!doctorDoc) {
+      return res.status(404).json({ error: "Doctor not found" });
+    }
+
+    // Find patient
+    const patientDoc = await patient.findOne({ Patient_ID: patientId });
+    if (!patientDoc) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
+
+    // Generate a unique Record_ID
+    const lastRecord = await medicalRecords.findOne().sort({ Record_ID: -1 });
+    const newRecordId = lastRecord ? lastRecord.Record_ID + 1 : 1;
+
+    // Create new medical record using Doctor_ID from doctor document
+    const newRecord = new medicalRecords({
+      Record_ID: newRecordId,
+      Patient_ID: patientId,
+      Doctor_ID: doctorDoc.Doctor_ID, // Use the numeric Doctor_ID
+      Test_Reports: []
+    });
+
+    // Save the record
+    const savedRecord = await newRecord.save();
+
+    // Update patient's medical history
+    if (patientDoc.Medical_History) {
+      patientDoc.Medical_History.push(savedRecord._id);
+    } else {
+      patientDoc.Medical_History = [savedRecord._id];
+    }
+    await patientDoc.save();
+
+    res.json({ 
+      message: "Medical record created successfully", 
+      record: savedRecord 
+    });
+  } catch (error) {
+    console.error("Error creating medical record:", error);
+    res.status(500).json({ error: "Failed to create medical record: " + error.message });
   }
 });
 

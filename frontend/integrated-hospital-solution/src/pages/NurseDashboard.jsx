@@ -16,7 +16,23 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Tab,
+  Tabs,
 } from "@mui/material";
+
+const TabPanel = (props) => {
+  const { children, value, index, ...other } = props;
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`tabpanel-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+};
 
 const NurseDashboard = () => {
   const [patients, setPatients] = useState([]);
@@ -25,6 +41,7 @@ const NurseDashboard = () => {
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
 
   const API_BASE_URL = "http://192.168.109.73:3000";
 
@@ -59,6 +76,14 @@ const NurseDashboard = () => {
     setError(null);
   };
 
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+    setSelectedPatient(null);
+    setSelectedDoctor("");
+    setSuccess(null);
+    setError(null);
+  };
+
   const handleAssignPatient = async () => {
     if (!selectedPatient || !selectedDoctor) {
       setError("Please select both a patient and a doctor");
@@ -80,6 +105,29 @@ const NurseDashboard = () => {
     }
   };
 
+  const handleCreateMedicalRecord = async () => {
+    if (!selectedPatient || !selectedDoctor) {
+      setError("Please select both a patient and a doctor");
+      return;
+    }
+
+    try {
+      setError(null);
+      const response = await axios.post(`${API_BASE_URL}/nurse/create-medical-record`, {
+        patientId: selectedPatient.Patient_ID,
+        doctorId: selectedDoctor
+      });
+      
+      setSuccess(response.data.message);
+      setSelectedPatient(null);
+      setSelectedDoctor("");
+    } catch (error) {
+      console.error("Error creating medical record:", error);
+      const errorMessage = error.response?.data?.error || "Failed to create medical record. Please try again.";
+      setError(errorMessage);
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       {error && (
@@ -92,86 +140,149 @@ const NurseDashboard = () => {
           {success}
         </Alert>
       )}
-      <Grid container spacing={3}>
-        {/* Patient List */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, height: "70vh", overflow: "auto" }}>
-            <Typography variant="h6" gutterBottom>
-              Patients
-            </Typography>
-            <List>
-              {patients.map((patient) => (
-                <React.Fragment key={patient._id}>
-                  <ListItem
-                    button
-                    onClick={() => handlePatientClick(patient)}
-                    selected={selectedPatient?._id === patient._id}
-                  >
-                    <ListItemText
-                      primary={patient.Name}
-                      secondary={`ID: ${patient.Patient_ID}`}
-                    />
-                  </ListItem>
-                  <Divider />
-                </React.Fragment>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
 
-        {/* Doctor Assignment */}
-        <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{ p: 2, minHeight: "70vh" }}>
-            {selectedPatient ? (
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  Assign Patient to Doctor
-                </Typography>
-                <Typography gutterBottom>
-                  Selected Patient: {selectedPatient.Name} (ID: {selectedPatient.Patient_ID})
-                </Typography>
-                <Box sx={{ my: 3 }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Select Doctor</InputLabel>
-                    <Select
-                      value={selectedDoctor}
-                      onChange={handleDoctorChange}
-                      label="Select Doctor"
+      <Paper elevation={3} sx={{ width: "100%", mb: 2 }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs value={tabValue} onChange={handleTabChange} centered>
+            <Tab label="Assign Patient to Doctor" />
+            <Tab label="Create Medical Record" />
+          </Tabs>
+        </Box>
+
+        <Grid container spacing={3}>
+          {/* Patient List */}
+          <Grid item xs={12} md={4}>
+            <Paper elevation={3} sx={{ p: 2, height: "70vh", overflow: "auto" }}>
+              <Typography variant="h6" gutterBottom>
+                Patients
+              </Typography>
+              <List>
+                {patients.map((patient) => (
+                  <React.Fragment key={patient._id}>
+                    <ListItem
+                      onClick={() => handlePatientClick(patient)}
+                      selected={selectedPatient?._id === patient._id}
+                      sx={{ cursor: 'pointer' }}
                     >
-                      {doctors.map((doctor) => (
-                        <MenuItem key={doctor._id} value={doctor._id}>
-                          {doctor.Name} - {doctor.Specialization}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleAssignPatient}
-                  disabled={!selectedDoctor}
-                >
-                  Assign Patient to Doctor
-                </Button>
-              </Box>
-            ) : (
-              <Box
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography variant="h6" color="textSecondary">
-                  Select a patient to assign to a doctor
-                </Typography>
-              </Box>
-            )}
-          </Paper>
+                      <ListItemText
+                        primary={patient.Name}
+                      />
+                    </ListItem>
+                    <Divider />
+                  </React.Fragment>
+                ))}
+              </List>
+            </Paper>
+          </Grid>
+
+          {/* Doctor Assignment/Medical Record Creation */}
+          <Grid item xs={12} md={8}>
+            <TabPanel value={tabValue} index={0}>
+              <Paper elevation={3} sx={{ p: 2, minHeight: "70vh" }}>
+                {selectedPatient ? (
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      Assign Patient to Doctor
+                    </Typography>
+                    <Typography gutterBottom>
+                      Selected Patient: {selectedPatient.Name}
+                    </Typography>
+                    <Box sx={{ my: 3 }}>
+                      <FormControl fullWidth>
+                        <InputLabel>Select Doctor</InputLabel>
+                        <Select
+                          value={selectedDoctor}
+                          onChange={handleDoctorChange}
+                          label="Select Doctor"
+                        >
+                          {doctors.map((doctor) => (
+                            <MenuItem key={doctor._id} value={doctor._id}>
+                              Dr. {doctor.Name} - {doctor.Specialization} (ID: {doctor.Doctor_ID})
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleAssignPatient}
+                      disabled={!selectedDoctor}
+                    >
+                      Assign Patient to Doctor
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography variant="h6" color="textSecondary">
+                      Select a patient to assign to a doctor
+                    </Typography>
+                  </Box>
+                )}
+              </Paper>
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={1}>
+              <Paper elevation={3} sx={{ p: 2, minHeight: "70vh" }}>
+                {selectedPatient ? (
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      Create Medical Record
+                    </Typography>
+                    <Typography gutterBottom>
+                      Selected Patient: {selectedPatient.Name}
+                    </Typography>
+                    <Box sx={{ my: 3 }}>
+                      <FormControl fullWidth>
+                        <InputLabel>Select Doctor</InputLabel>
+                        <Select
+                          value={selectedDoctor}
+                          onChange={handleDoctorChange}
+                          label="Select Doctor"
+                        >
+                          {doctors.map((doctor) => (
+                            <MenuItem key={doctor._id} value={doctor._id}>
+                              Dr. {doctor.Name} - {doctor.Specialization} (ID: {doctor.Doctor_ID})
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleCreateMedicalRecord}
+                      disabled={!selectedDoctor}
+                    >
+                      Create Medical Record
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography variant="h6" color="textSecondary">
+                      Select a patient to create a medical record
+                    </Typography>
+                  </Box>
+                )}
+              </Paper>
+            </TabPanel>
+          </Grid>
         </Grid>
-      </Grid>
+      </Paper>
     </Container>
   );
 };

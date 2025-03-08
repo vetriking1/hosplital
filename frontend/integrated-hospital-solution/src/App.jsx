@@ -26,17 +26,13 @@ function App() {
           <Route path="/billing" element={<Billing />} />
           <Route
             path="/user-dashboard"
-            element={
-              <ProtectedRoute>
-                <UserDashboard />
-              </ProtectedRoute>
-            }
+            element={<ProtectedRoute></ProtectedRoute>}
           />
           <Route
             path="/patientdashboard"
             element={
               <ProtectedRoute>
-                <PatientsPage />
+                <UserDashboard />
               </ProtectedRoute>
             }
           />
