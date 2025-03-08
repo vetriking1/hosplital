@@ -14,7 +14,6 @@ function Navbar() {
     <nav className="flex justify-between items-center p-6 bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
       {/* Left Side: Logo */}
       <div className="flex items-center space-x-3">
-        <img src="/logo.png" alt="Logo" className="w-12 h-12 rounded-full shadow-md" />
         <span className="text-2xl font-extrabold text-white tracking-wide">
           <Link to="/">🏥 Integrated Hospital</Link>
         </span>
