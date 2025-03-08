@@ -16,6 +16,7 @@ function AdminDashboard() {
   const [patient, setPatient] = useState({
     Patient_ID: "",
     Name: "",
+    password: "",
     Age: "",
     Gender: "",
     Contact_Number: "",

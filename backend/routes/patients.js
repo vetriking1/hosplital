@@ -25,6 +25,7 @@ router.post("/", async (req, res) => {
       Address,
       Blood_Group,
       Admission_Status,
+      
     });
 
     res.status(201).json(newPatient);

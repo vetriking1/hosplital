@@ -8,6 +8,7 @@ const DoctorSchema = new mongoose.Schema(
     Contact_Number: { type: String, required: true },
     Department: { type: String, required: true },
     Availability_Status: { type: String, required: true },
+    Patient_List: [{ type: mongoose.Schema.Types.ObjectId, ref: "Patient" }], 
   },
   { collection: "doctors" }
 );

@@ -8,6 +8,11 @@ const TestReportSchema = new mongoose.Schema(
     Test_Name: { type: String, required: true },
     Test_Result: { type: String, required: true },
     Test_Date: { type: Date, required: true },
+    PDF_File: {
+      filename: { type: String, required: true },
+      contentType: { type: String, required: true },
+      data: { type: Buffer, required: true }
+    }
   },
   { collection: "test_reports" }
 );

@@ -27,7 +27,7 @@ app.use("/auth", authRoute);
 app.use("/nurse", nurseRoute);
 app.use("/doctors", doctorRoute);
 app.use("/biller", billRoute);
-app.use("/labTech", labTechRoute);
+app.use("/lab", labTechRoute);
 
 const port = 3000;
 

@@ -11,8 +11,8 @@ router.post("/addPatient", async (req, res) => {
   try {
     const {
       loginId,
-      password,
       name,
+      password,
       age,
       gender,
       contact_number,
@@ -23,6 +23,7 @@ router.post("/addPatient", async (req, res) => {
 
     // Create a new Patient document with proper field names
     const newPatient = new Patient({
+      Patient_ID: new mongoose.Types.ObjectId().toString(),
       Name: name,
       Age: age,
       Gender: gender,
@@ -30,7 +31,8 @@ router.post("/addPatient", async (req, res) => {
       Address: address,
       Blood_Group: blood_group,
       Admission_Status: admission_status,
-      // Add Patient_ID if needed
+      Medical_History: [],
+      Bills: [],
     });
 
     const savedPatient = await newPatient.save();
