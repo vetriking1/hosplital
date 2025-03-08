@@ -60,10 +60,13 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.post("http://localhost:3000/auth/login", {
-        loginId,
-        password,
-      });
+      const response = await axios.post(
+        "http://192.168.109.73:3000/auth/login",
+        {
+          loginId,
+          password,
+        }
+      );
 
       const { token, user } = response.data;
       localStorage.setItem("token", token);
