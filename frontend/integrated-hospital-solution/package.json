@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.12",
+    "axios": "^1.8.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "integrated-hospital-solution": "file:",
     "jwt-decode": "^4.0.0",
     "mongoose": "^8.12.1",
     "react": "^19.0.0",
