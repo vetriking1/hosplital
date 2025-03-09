@@ -14,6 +14,7 @@ import {
   CardContent,
   Alert,
 } from "@mui/material";
+import Navbar from "../components/Navbar";
 
 const DoctorDashboard = () => {
   const [patients, setPatients] = useState([]);
@@ -56,6 +57,7 @@ const DoctorDashboard = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Navbar />
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}

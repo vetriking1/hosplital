@@ -1,5 +1,5 @@
 import Navbar from "../components/Navbar";
-
+import TestPdfViewer from "../components/Test";
 function LandingPage() {
   return (
     <div className="bg-gray-100 text-gray-900 font-sans">
@@ -94,7 +94,6 @@ function LandingPage() {
           </button>
         </a>
       </section>
-
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-2 text-center">
         <p className="text-m">
