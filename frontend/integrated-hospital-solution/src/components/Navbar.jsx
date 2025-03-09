@@ -11,11 +11,11 @@ function Navbar() {
   };
 
   return (
-    <nav className="flex justify-between items-center p-6 bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
+    <nav className="flex justify-between items-center p-6 bg-gradient-to-b from-purple-600 to-blue-600 shadow-lg">
       {/* Left Side: Logo */}
       <div className="flex items-center space-x-3">
         <span className="text-2xl font-extrabold text-white tracking-wide">
-          <Link to="/">🏥 Integrated Hospital</Link>
+          <Link to="/">🏥 Anandam Multi-Speciality Hospital</Link>
         </span>
       </div>
 
@@ -36,12 +36,12 @@ function Navbar() {
             >
               Login
             </Link>
-            <Link
+            {/* <Link
               to="/signup"
               className="bg-yellow-500 text-white px-6 py-2 rounded-full font-semibold shadow-lg hover:bg-yellow-600 transition-transform hover:scale-105"
             >
               Sign Up
-            </Link>
+            </Link> */}
           </>
         )}
       </div>
@@ -49,5 +49,4 @@ function Navbar() {
   );
 }
 
-
-export default Navbar ;
+export default Navbar;

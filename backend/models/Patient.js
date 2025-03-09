@@ -14,6 +14,7 @@ const PatientSchema = new mongoose.Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "MedicalRecord" },
     ],
     Bills: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bill" }],
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { collection: "patients" }
 );

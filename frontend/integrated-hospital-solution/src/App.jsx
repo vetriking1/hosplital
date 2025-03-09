@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import PatientsPage from "./pages/PatientsPage";
 import LoginPage from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
 import DoctorsPage from "./pages/DoctorDashbord";

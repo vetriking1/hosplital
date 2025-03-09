@@ -79,6 +79,8 @@ export const AuthProvider = ({ children }) => {
         navigate("/patientdashboard");
       } else if (role === "doctor") {
         navigate("/doctordashboard");
+      } else if (role === "admin") {
+        navigate("/admin");
       }
     } catch (err) {
       console.error("Login error:", err);

@@ -9,6 +9,7 @@ const nurseRoute = require("./routes/nurse");
 const doctorRoute = require("./routes/doctor");
 const billRoute = require("./routes/bill");
 const labTechRoute = require("./routes/lab");
+const userDashboardRoute = require("./routes/userDashboard");
 // Connect to MongoDB
 dotenv.config();
 const app = express();
@@ -26,8 +27,9 @@ app.use("/users", userRoute);
 app.use("/auth", authRoute);
 app.use("/nurse", nurseRoute);
 app.use("/doctors", doctorRoute);
-app.use("/biller", billRoute);
+app.use("/bill", billRoute);
 app.use("/lab", labTechRoute);
+app.use("/user-dashboard", userDashboardRoute);
 
 const port = 3000;
 

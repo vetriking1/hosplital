@@ -1,4 +1,4 @@
-  import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Container,
@@ -19,6 +19,7 @@ import {
   Chip,
 } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -39,32 +40,45 @@ const UserDashboard = () => {
   const [medicalRecords, setMedicalRecords] = useState([]);
   const [bills, setBills] = useState([]);
   const [error, setError] = useState(null);
+  const [patientData, setPatientData] = useState(null);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const API_BASE_URL = "http://192.168.109.73:3000";
 
   useEffect(() => {
-    if (user) {
-      fetchUserData();
+    if (!user) {
+      navigate("/login");
+      return;
     }
-  }, [user]);
 
-  const fetchUserData = async () => {
-    try {
-      setError(null);
-      const [recordsRes, billsRes] = await Promise.all([
-        axios.get(
-          `${API_BASE_URL}/user-dashboard/medical-records/${user.Patient_ID}`
-        ),
-        axios.get(`${API_BASE_URL}/user-dashboard/bills/${user.Patient_ID}`),
-      ]);
-      setMedicalRecords(recordsRes.data);
-      setBills(billsRes.data);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      setError("Failed to fetch your data. Please try again later.");
-    }
-  };
+    // First fetch patient data using user ID
+    const fetchPatientData = async () => {
+      try {
+        console.log("Fetching patient data for user:", user._id);
+        const response = await axios.get(`${API_BASE_URL}/patients/user/${user._id}`);
+        
+        if (response.data) {
+          console.log("Patient data received:", response.data);
+          setPatientData(response.data);
+          // Medical records and bills are already populated in the patient data
+          setMedicalRecords(response.data.Medical_History || []);
+          setBills(response.data.Bills || []);
+        } else {
+          setError("User is not a patient. Access denied.");
+        }
+      } catch (error) {
+        console.error("Error fetching patient data:", error);
+        if (error.response?.status === 404) {
+          setError("No patient record found for this user. Please contact the administrator.");
+        } else {
+          setError("Failed to fetch patient data. Please try again later.");
+        }
+      }
+    };
+
+    fetchPatientData();
+  }, [user, navigate]);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
