@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Navbar from "../components/Navbar";
 import {
   Container,
   Grid,
@@ -127,7 +128,6 @@ const UserDashboard = () => {
       );
     }
   };
-
   // Improved date formatting function that handles various date formats
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -169,7 +169,7 @@ const UserDashboard = () => {
           {error}
         </Alert>
       )}
-
+      <Navbar></Navbar>
       <Paper elevation={3} sx={{ width: "100%", mb: 2 }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={tabValue} onChange={handleTabChange} centered>
@@ -232,10 +232,12 @@ const UserDashboard = () => {
                             <Typography>
                               <strong>Test Result:</strong> {report.Test_Result}
                             </Typography>
+                            {console.log("Report ID:", report)}
                             <Button
                               variant="contained"
                               color="primary"
-                              onClick={() => viewPDF(report._id)}
+                              // If the ID is stored in, for example, report.Report_ID instead of report._id
+                              onClick={() => viewPDF(report)}
                               sx={{ mt: 2 }}
                             >
                               View Report PDF
@@ -267,19 +269,17 @@ const UserDashboard = () => {
                         justifyContent="space-between"
                         alignItems="center"
                       >
-                        <Typography variant="h6">
-                          Bill #{bill.Bill_ID || "N/A"}
-                        </Typography>
+                        <Typography variant="h6">Bill</Typography>
                         <Chip
                           label={bill.Payment_Status || "Unknown"}
                           color={getPaymentStatusColor(bill.Payment_Status)}
                         />
                       </Box>
                       <Typography color="textSecondary" gutterBottom>
-                        Date: {formatDate(bill.Payment_Date)}
+                        Date: {formatDate(bill.Billing_Date)}
                       </Typography>
                       <Typography variant="h5" component="div">
-                        ₹{bill.Amount || "0"}
+                        ₹{bill.Total_Amount || "0"}
                       </Typography>
                       <Typography color="textSecondary">
                         {bill.Description || "No description"}

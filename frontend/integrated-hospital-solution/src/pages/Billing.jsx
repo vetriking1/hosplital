@@ -34,6 +34,8 @@ const Billing = () => {
           axios.get(`${BASE_URL}/patients`),
           axios.get(`${BASE_URL}/doctors`),
         ]);
+        console.log("Patients data:", patientsRes.data);
+        console.log("Doctors data:", doctorsRes.data);
         setPatients(patientsRes.data);
         setDoctors(doctorsRes.data);
       } catch (error) {
@@ -92,7 +94,7 @@ const Billing = () => {
                         key={patient.Patient_ID}
                         value={patient.Patient_ID}
                       >
-                        {patient.name}
+                        {patient.Name}
                       </MenuItem>
                     ))}
                   </Select>
@@ -110,7 +112,7 @@ const Billing = () => {
                   >
                     {doctors.map((doctor) => (
                       <MenuItem key={doctor.Doctor_ID} value={doctor.Doctor_ID}>
-                        {doctor.name}
+                        {doctor.Name}
                       </MenuItem>
                     ))}
                   </Select>
