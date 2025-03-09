@@ -13,6 +13,7 @@ import {
   Card,
   CardContent,
   Alert,
+  Button,
 } from "@mui/material";
 import Navbar from "../components/Navbar";
 
@@ -51,8 +52,52 @@ const DoctorDashboard = () => {
     }
   };
 
+  const viewPDF = async (reportId) => {
+    if (!reportId) {
+      setError("Report ID is missing");
+      return;
+    }
+
+    try {
+      console.log("Viewing PDF for report ID:", reportId);
+      const response = await axios.get(
+        `${API_BASE_URL}/user-dashboard/report-pdf/${reportId}`,
+        {
+          responseType: "blob", // Ensure binary response
+        }
+      );
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      // Open in new tab
+      window.open(url);
+
+      // Cleanup URL after some time
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 10000);
+    } catch (error) {
+      console.error("Error viewing PDF:", error);
+      setError(
+        "Failed to view PDF: " +
+          (error.response?.data?.message || error.message)
+      );
+    }
+  };
+
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return "N/A";
+      }
+      return date.toLocaleDateString();
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "N/A";
+    }
   };
 
   return (
@@ -135,39 +180,46 @@ const DoctorDashboard = () => {
                       <Grid item xs={12} key={record._id}>
                         <Card>
                           <CardContent>
-                            <Typography variant="h6" color="primary">
-                              Visit Date: {formatDate(record.Follow_Up_Date)}
-                            </Typography>
-                            <Typography>
-                              <strong>Diagnosis:</strong> {record.Diagnosis}
-                            </Typography>
-                            <Typography>
-                              <strong>Treatment:</strong> {record.Treatment}
-                            </Typography>
-                            <Typography>
-                              <strong>Medications:</strong> {record.Medications}
-                            </Typography>
-                            <Typography>
-                              <strong>Notes:</strong> {record.Notes}
-                            </Typography>
                             {record.Test_Reports &&
                               record.Test_Reports.length > 0 && (
-                                <Box mt={1}>
-                                  <Typography>
+                                <Box mt={2}>
+                                  <Typography variant="subtitle1" gutterBottom>
                                     <strong>Test Reports:</strong>
                                   </Typography>
-                                  <List dense>
+                                  <Grid container spacing={2}>
                                     {record.Test_Reports.map((report) => (
-                                      <ListItem key={report._id}>
-                                        <ListItemText
-                                          primary={report.test_name}
-                                          secondary={`Date: ${formatDate(
-                                            report.date
-                                          )}`}
-                                        />
-                                      </ListItem>
+                                      <Grid item xs={12} key={report._id}>
+                                        <Card variant="outlined">
+                                          <CardContent>
+                                            <Typography variant="subtitle2">
+                                              Test Name: {report.Test_Name}
+                                            </Typography>
+                                            <Typography
+                                              variant="body2"
+                                              color="textSecondary"
+                                            >
+                                              Date:{" "}
+                                              {formatDate(report.Test_Date)}
+                                            </Typography>
+                                            <Typography variant="body2">
+                                              Result: {report.Test_Result}
+                                            </Typography>
+                                            <Button
+                                              variant="contained"
+                                              color="primary"
+                                              size="small"
+                                              onClick={() =>
+                                                viewPDF(report._id)
+                                              }
+                                              sx={{ mt: 1 }}
+                                            >
+                                              View Report PDF
+                                            </Button>
+                                          </CardContent>
+                                        </Card>
+                                      </Grid>
                                     ))}
-                                  </List>
+                                  </Grid>
                                 </Box>
                               )}
                           </CardContent>

@@ -66,8 +66,8 @@ const UserDashboard = () => {
           console.log("Medical records:", response.data.Medical_History);
           // Check if Medical_History has TestReport field
           if (response.data.Medical_History) {
-            response.data.Medical_History.forEach(record => {
-              console.log("Record's test reports:", record.TestReport);
+            response.data.Medical_History.forEach((record) => {
+              console.log("Record's test reports:", record.Test_Reports);
             });
           }
           setMedicalRecords(response.data.Medical_History || []);
@@ -105,11 +105,20 @@ const UserDashboard = () => {
       const response = await axios.get(
         `${API_BASE_URL}/user-dashboard/report-pdf/${reportId}`,
         {
-          responseType: "blob",
+          responseType: "blob", // Ensure binary response
         }
       );
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      // Open in new tab
       window.open(url);
+
+      // Cleanup URL after some time
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 10000);
     } catch (error) {
       console.error("Error viewing PDF:", error);
       setError(
@@ -206,33 +215,37 @@ const UserDashboard = () => {
         <TabPanel value={tabValue} index={1}>
           <Grid container spacing={2}>
             {medicalRecords && medicalRecords.length > 0 ? (
-              medicalRecords.map((record) => (
-                record.TestReport && record.TestReport.map((report) => (
-                  <Grid item xs={12} key={report._id}>
-                    <Card>
-                      <CardContent>
-                        <Typography variant="h6" gutterBottom>
-                          Test Name: {report.Test_Name}
-                        </Typography>
-                        <Typography>
-                          <strong>Test Date:</strong> {formatDate(report.Test_Date)}
-                        </Typography>
-                        <Typography>
-                          <strong>Test Result:</strong> {report.Test_Result}
-                        </Typography>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => viewPDF(report._id)}
-                          sx={{ mt: 2 }}
-                        >
-                          View Report PDF
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))
-              ))
+              medicalRecords.map((record) => {
+                console.log("Processing record:", record);
+                return record.Test_Reports && record.Test_Reports.length > 0
+                  ? record.Test_Reports.map((report) => (
+                      <Grid item xs={12} key={report._id}>
+                        <Card>
+                          <CardContent>
+                            <Typography variant="h6" gutterBottom>
+                              Test Name: {report.Test_Name}
+                            </Typography>
+                            <Typography>
+                              <strong>Test Date:</strong>{" "}
+                              {formatDate(report.Test_Date)}
+                            </Typography>
+                            <Typography>
+                              <strong>Test Result:</strong> {report.Test_Result}
+                            </Typography>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => viewPDF(report._id)}
+                              sx={{ mt: 2 }}
+                            >
+                              View Report PDF
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))
+                  : null;
+              })
             ) : (
               <Grid item xs={12}>
                 <Typography align="center">No test reports found</Typography>
