@@ -26,9 +26,146 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
+import { styled, alpha } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import FilterListIcon from "@mui/icons-material/FilterList";
+
+// Custom styled components
+const StyledContainer = styled(Box)(({ theme }) => ({
+  backgroundColor: "#E8F6FC", // Alice Blue for a clean background
+  padding: theme.spacing(4),
+  minHeight: "100vh",
+  fontFamily: "'Roboto', sans-serif", // Professional font
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  backgroundColor: "#FFFFFF", // White for crisp cards
+  padding: theme.spacing(3),
+  borderRadius: 12,
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)", // Subtle shadow
+  border: "1px solid #D0EAF4", // Columbia Blue border
+  transition: "box-shadow 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0 6px 16px rgba(0, 0, 0, 0.1)", // Lift on hover
+  },
+}));
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  "& .MuiTabs-indicator": {
+    backgroundColor: "#404E7C", // YInMn Blue for tab indicator
+  },
+  "& .MuiTab-root": {
+    textTransform: "none",
+    fontWeight: 500,
+    color: "#404E7C",
+    "&.Mui-selected": {
+      color: "#404E7C",
+      fontWeight: 600,
+    },
+  },
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#404E7C", // YInMn Blue for primary actions
+  color: "#FFFFFF",
+  padding: theme.spacing(1, 2),
+  borderRadius: 8,
+  textTransform: "none",
+  fontWeight: 600,
+  "&:hover": {
+    backgroundColor: alpha("#404E7C", 0.85), // Slightly lighter on hover
+    boxShadow: "0 2px 8px rgba(64, 78, 124, 0.2)",
+  },
+  "&:disabled": {
+    backgroundColor: "#D0EAF4", // Columbia Blue for disabled
+    color: "#666",
+  },
+}));
+
+const SecondaryButton = styled(Button)(({ theme }) => ({
+  borderColor: "#A5D8F3", // Uranian Blue for secondary buttons
+  color: "#404E7C", // YInMn Blue for text
+  padding: theme.spacing(1, 2),
+  borderRadius: 8,
+  textTransform: "none",
+  fontWeight: 500,
+  "&:hover": {
+    backgroundColor: "#A5D8F3", // Uranian Blue on hover
+    borderColor: "#404E7C",
+    color: "#404E7C",
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 8,
+    backgroundColor: "#F9FBFD", // Light background for inputs
+    "& fieldset": {
+      borderColor: "#D0EAF4", // Columbia Blue
+    },
+    "&:hover fieldset": {
+      borderColor: "#A5D8F3", // Uranian Blue on hover
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "#404E7C", // YInMn Blue when focused
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: "#404E7C", // YInMn Blue for labels
+    fontWeight: 500,
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: "#404E7C",
+  },
+}));
+
+const StyledSelect = styled(Select)(({ theme }) => ({
+  borderRadius: 8,
+  backgroundColor: "#F9FBFD",
+  "& .MuiSelect-select": {
+    color: "#404E7C",
+  },
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#D0EAF4",
+  },
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#A5D8F3",
+  },
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#404E7C",
+  },
+}));
+
+const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+  borderRadius: 12,
+  border: "1px solid #D0EAF4", // Columbia Blue border
+  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+}));
+
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+  backgroundColor: "#E8F6FC", // Alice Blue for table header
+  "& .MuiTableCell-head": {
+    color: "#404E7C", // YInMn Blue for text
+    fontWeight: 600,
+  },
+}));
+
+const StyledChip = styled(Chip)(({ theme }) => ({
+  fontWeight: 500,
+  "&.MuiChip-colorPrimary": {
+    backgroundColor: "#A5D8F3", // Uranian Blue for In-Patient/Available
+    color: "#404E7C",
+  },
+  "&.MuiChip-colorSuccess": {
+    backgroundColor: "#E8F5E9", // Light green for Out-Patient/Present
+    color: "#2E7D32",
+  },
+  "&.MuiChip-colorError": {
+    backgroundColor: "#FFF1F1", // Light red for Not Available/Absent
+    color: "#D32F2F",
+  },
+}));
 
 const DashboardRecords = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -57,7 +194,7 @@ const DashboardRecords = () => {
     department: "",
   });
 
-  const API_BASE_URL = "http://192.168.109.73:3000";
+  const API_BASE_URL = "http://localhost:3000";
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -177,36 +314,55 @@ const DashboardRecords = () => {
   }, []);
 
   return (
-    <Box sx={{ maxWidth: 1200, margin: "auto", mt: 4, p: 3 }}>
-      <Typography variant="h4" gutterBottom align="center">
+    <StyledContainer sx={{ maxWidth: 1200, margin: "auto" }}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        align="center"
+        sx={{ color: "#404E7C", fontWeight: 600, mb: 4 }}
+      >
         Hospital Records
       </Typography>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert
+          severity="error"
+          sx={{
+            mb: 3,
+            borderRadius: 2,
+            backgroundColor: "#FFF1F1",
+            color: "#D32F2F",
+          }}
+        >
           {error}
         </Alert>
       )}
 
-      <Paper sx={{ width: "100%", mb: 2 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} centered>
+      <StyledPaper sx={{ width: "100%", mb: 4 }}>
+        <StyledTabs value={activeTab} onChange={handleTabChange} centered>
           <Tab label="Patients" />
           <Tab label="Doctors" />
           <Tab label="Staff" />
-        </Tabs>
+        </StyledTabs>
 
         {/* Patients Tab */}
         {activeTab === 0 && (
           <Box sx={{ p: 3 }}>
-            <Card sx={{ mb: 3 }}>
+            <Card sx={{ mb: 3, borderRadius: 2, border: "1px solid #D0EAF4" }}>
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  <FilterListIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ color: "#404E7C", fontWeight: 600 }}
+                >
+                  <FilterListIcon
+                    sx={{ mr: 1, verticalAlign: "middle", color: "#404E7C" }}
+                  />
                   Filter Patients
                 </Typography>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={5}>
-                    <TextField
+                    <StyledTextField
                       fullWidth
                       label="Search by Name or Blood Group"
                       name="search"
@@ -218,8 +374,10 @@ const DashboardRecords = () => {
                   </Grid>
                   <Grid item xs={12} sm={4}>
                     <FormControl fullWidth size="small">
-                      <InputLabel>Admission Status</InputLabel>
-                      <Select
+                      <InputLabel sx={{ color: "#404E7C", fontWeight: 500 }}>
+                        Admission Status
+                      </InputLabel>
+                      <StyledSelect
                         name="status"
                         value={patientFilters.status}
                         onChange={handlePatientFilterChange}
@@ -228,29 +386,28 @@ const DashboardRecords = () => {
                         <MenuItem value="">All</MenuItem>
                         <MenuItem value="In-Patient">In-Patient</MenuItem>
                         <MenuItem value="Out-Patient">Out-Patient</MenuItem>
-                      </Select>
+                      </StyledSelect>
                     </FormControl>
                   </Grid>
                   <Grid item xs={6} sm={1.5}>
-                    <Button
+                    <StyledButton
                       fullWidth
                       variant="contained"
-                      color="primary"
                       onClick={applyPatientFilters}
                       startIcon={<SearchIcon />}
                     >
                       Filter
-                    </Button>
+                    </StyledButton>
                   </Grid>
                   <Grid item xs={6} sm={1.5}>
-                    <Button
+                    <SecondaryButton
                       fullWidth
                       variant="outlined"
                       onClick={resetPatientFilters}
                       startIcon={<RefreshIcon />}
                     >
                       Reset
-                    </Button>
+                    </SecondaryButton>
                   </Grid>
                 </Grid>
               </CardContent>
@@ -258,12 +415,12 @@ const DashboardRecords = () => {
 
             {loading ? (
               <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-                <CircularProgress />
+                <CircularProgress sx={{ color: "#404E7C" }} />
               </Box>
             ) : (
-              <TableContainer component={Paper}>
+              <StyledTableContainer>
                 <Table>
-                  <TableHead>
+                  <StyledTableHead>
                     <TableRow>
                       <TableCell>ID</TableCell>
                       <TableCell>Name</TableCell>
@@ -273,7 +430,7 @@ const DashboardRecords = () => {
                       <TableCell>Contact</TableCell>
                       <TableCell>Admission Status</TableCell>
                     </TableRow>
-                  </TableHead>
+                  </StyledTableHead>
                   <TableBody>
                     {patients.length > 0 ? (
                       patients.map((patient) => (
@@ -285,7 +442,7 @@ const DashboardRecords = () => {
                           <TableCell>{patient.Blood_Group}</TableCell>
                           <TableCell>{patient.Contact_Number}</TableCell>
                           <TableCell>
-                            <Chip
+                            <StyledChip
                               label={patient.Admission_Status}
                               color={
                                 patient.Admission_Status === "In-Patient"
@@ -300,13 +457,17 @@ const DashboardRecords = () => {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={7} align="center">
-                          No patients found
+                          <Typography
+                            sx={{ color: "#404E7C", fontWeight: 500 }}
+                          >
+                            No patients found
+                          </Typography>
                         </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
                 </Table>
-              </TableContainer>
+              </StyledTableContainer>
             )}
           </Box>
         )}
@@ -314,15 +475,21 @@ const DashboardRecords = () => {
         {/* Doctors Tab */}
         {activeTab === 1 && (
           <Box sx={{ p: 3 }}>
-            <Card sx={{ mb: 3 }}>
+            <Card sx={{ mb: 3, borderRadius: 2, border: "1px solid #D0EAF4" }}>
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  <FilterListIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ color: "#404E7C", fontWeight: 600 }}
+                >
+                  <FilterListIcon
+                    sx={{ mr: 1, verticalAlign: "middle", color: "#404E7C" }}
+                  />
                   Filter Doctors
                 </Typography>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={5}>
-                    <TextField
+                    <StyledTextField
                       fullWidth
                       label="Search by Name or Specialization"
                       name="search"
@@ -333,7 +500,7 @@ const DashboardRecords = () => {
                     />
                   </Grid>
                   <Grid item xs={12} sm={4}>
-                    <TextField
+                    <StyledTextField
                       fullWidth
                       label="Department"
                       name="department"
@@ -344,25 +511,24 @@ const DashboardRecords = () => {
                     />
                   </Grid>
                   <Grid item xs={6} sm={1.5}>
-                    <Button
+                    <StyledButton
                       fullWidth
                       variant="contained"
-                      color="primary"
                       onClick={applyDoctorFilters}
                       startIcon={<SearchIcon />}
                     >
                       Filter
-                    </Button>
+                    </StyledButton>
                   </Grid>
                   <Grid item xs={6} sm={1.5}>
-                    <Button
+                    <SecondaryButton
                       fullWidth
                       variant="outlined"
                       onClick={resetDoctorFilters}
                       startIcon={<RefreshIcon />}
                     >
                       Reset
-                    </Button>
+                    </SecondaryButton>
                   </Grid>
                 </Grid>
               </CardContent>
@@ -370,12 +536,12 @@ const DashboardRecords = () => {
 
             {loading ? (
               <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-                <CircularProgress />
+                <CircularProgress sx={{ color: "#404E7C" }} />
               </Box>
             ) : (
-              <TableContainer component={Paper}>
+              <StyledTableContainer>
                 <Table>
-                  <TableHead>
+                  <StyledTableHead>
                     <TableRow>
                       <TableCell>ID</TableCell>
                       <TableCell>Name</TableCell>
@@ -386,7 +552,7 @@ const DashboardRecords = () => {
                       <TableCell>Contact</TableCell>
                       <TableCell>Status</TableCell>
                     </TableRow>
-                  </TableHead>
+                  </StyledTableHead>
                   <TableBody>
                     {doctors.length > 0 ? (
                       doctors.map((doctor) => (
@@ -399,7 +565,7 @@ const DashboardRecords = () => {
                           <TableCell>{doctor.Specialization}</TableCell>
                           <TableCell>{doctor.Contact_Number}</TableCell>
                           <TableCell>
-                            <Chip
+                            <StyledChip
                               label={doctor.Availability_Status}
                               color={
                                 doctor.Availability_Status === "Available"
@@ -414,13 +580,17 @@ const DashboardRecords = () => {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={8} align="center">
-                          No doctors found
+                          <Typography
+                            sx={{ color: "#404E7C", fontWeight: 500 }}
+                          >
+                            No doctors found
+                          </Typography>
                         </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
                 </Table>
-              </TableContainer>
+              </StyledTableContainer>
             )}
           </Box>
         )}
@@ -428,15 +598,21 @@ const DashboardRecords = () => {
         {/* Staff Tab */}
         {activeTab === 2 && (
           <Box sx={{ p: 3 }}>
-            <Card sx={{ mb: 3 }}>
+            <Card sx={{ mb: 3, borderRadius: 2, border: "1px solid #D0EAF4" }}>
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  <FilterListIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ color: "#404E7C", fontWeight: 600 }}
+                >
+                  <FilterListIcon
+                    sx={{ mr: 1, verticalAlign: "middle", color: "#404E7C" }}
+                  />
                   Filter Staff
                 </Typography>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={3}>
-                    <TextField
+                    <StyledTextField
                       fullWidth
                       label="Search by Name"
                       name="search"
@@ -448,8 +624,10 @@ const DashboardRecords = () => {
                   </Grid>
                   <Grid item xs={12} sm={3}>
                     <FormControl fullWidth size="small">
-                      <InputLabel>Role</InputLabel>
-                      <Select
+                      <InputLabel sx={{ color: "#404E7C", fontWeight: 500 }}>
+                        Role
+                      </InputLabel>
+                      <StyledSelect
                         name="role"
                         value={staffFilters.role}
                         onChange={handleStaffFilterChange}
@@ -466,11 +644,11 @@ const DashboardRecords = () => {
                           Administrative
                         </MenuItem>
                         <MenuItem value="Maintenance">Maintenance</MenuItem>
-                      </Select>
+                      </StyledSelect>
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <TextField
+                    <StyledTextField
                       fullWidth
                       label="Department"
                       name="department"
@@ -481,25 +659,24 @@ const DashboardRecords = () => {
                     />
                   </Grid>
                   <Grid item xs={6} sm={1.5}>
-                    <Button
+                    <StyledButton
                       fullWidth
                       variant="contained"
-                      color="primary"
                       onClick={applyStaffFilters}
                       startIcon={<SearchIcon />}
                     >
                       Filter
-                    </Button>
+                    </StyledButton>
                   </Grid>
                   <Grid item xs={6} sm={1.5}>
-                    <Button
+                    <SecondaryButton
                       fullWidth
                       variant="outlined"
                       onClick={resetStaffFilters}
                       startIcon={<RefreshIcon />}
                     >
                       Reset
-                    </Button>
+                    </SecondaryButton>
                   </Grid>
                 </Grid>
               </CardContent>
@@ -507,12 +684,12 @@ const DashboardRecords = () => {
 
             {loading ? (
               <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-                <CircularProgress />
+                <CircularProgress sx={{ color: "#404E7C" }} />
               </Box>
             ) : (
-              <TableContainer component={Paper}>
+              <StyledTableContainer>
                 <Table>
-                  <TableHead>
+                  <StyledTableHead>
                     <TableRow>
                       <TableCell>ID</TableCell>
                       <TableCell>Name</TableCell>
@@ -523,7 +700,7 @@ const DashboardRecords = () => {
                       <TableCell>Contact</TableCell>
                       <TableCell>Status</TableCell>
                     </TableRow>
-                  </TableHead>
+                  </StyledTableHead>
                   <TableBody>
                     {staffMembers.length > 0 ? (
                       staffMembers.map((staff) => (
@@ -536,7 +713,7 @@ const DashboardRecords = () => {
                           <TableCell>{staff.Department}</TableCell>
                           <TableCell>{staff.Contact_Number}</TableCell>
                           <TableCell>
-                            <Chip
+                            <StyledChip
                               label={staff.Attendance_Status}
                               color={
                                 staff.Attendance_Status === "Present"
@@ -551,18 +728,22 @@ const DashboardRecords = () => {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={8} align="center">
-                          No staff members found
+                          <Typography
+                            sx={{ color: "#404E7C", fontWeight: 500 }}
+                          >
+                            No staff members found
+                          </Typography>
                         </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
                 </Table>
-              </TableContainer>
+              </StyledTableContainer>
             )}
           </Box>
         )}
-      </Paper>
-    </Box>
+      </StyledPaper>
+    </StyledContainer>
   );
 };
 

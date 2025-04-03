@@ -13,7 +13,7 @@ const TestPdfViewer = () => {
   const [reportId, setReportId] = useState("67ccf0889f9f53299c212a24"); // Default to the ID in your screenshot
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const API_BASE_URL = "http://192.168.109.73:3000";
+  const API_BASE_URL = "http://localhost:3000";
 
   const viewPDF = async () => {
     if (!reportId) {

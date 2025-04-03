@@ -19,7 +19,6 @@ router.get("/medical-records/:patientId", async (req, res) => {
     }
 
     res.json(records);
-    
   } catch (error) {
     console.error("Error fetching medical records:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -84,6 +83,21 @@ router.get("/report-pdf/:reportId", async (req, res) => {
       error: error.message,
       stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
+  }
+});
+
+router.get("/data/:idData", async (req, res) => {
+  try {
+    const data = await TestReport.findById(req.params.idData);
+
+    if (!data) {
+      return res.status(404).json({ message: "Data not found" });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

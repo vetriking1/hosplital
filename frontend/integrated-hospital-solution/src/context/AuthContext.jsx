@@ -60,13 +60,10 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.post(
-        "http://192.168.109.73:3000/auth/login",
-        {
-          loginId,
-          password,
-        }
-      );
+      const response = await axios.post("http://localhost:3000/auth/login", {
+        loginId,
+        password,
+      });
 
       const { token, user } = response.data;
       localStorage.setItem("token", token);
@@ -82,6 +79,13 @@ export const AuthProvider = ({ children }) => {
       } else if (role === "admin") {
         navigate("/admin");
       }
+      // staff role 
+      else if (role === "staff") {
+        // get the staff role 
+        
+      }
+
+
     } catch (err) {
       console.error("Login error:", err);
       setError(err.response?.data?.message || "Login failed");
@@ -94,7 +98,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user"); // Remove user data
     setUser(null);
-    navigate("/login");
+    navigate("/");
   };
 
   return (

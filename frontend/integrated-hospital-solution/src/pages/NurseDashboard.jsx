@@ -19,7 +19,10 @@ import {
   Tab,
   Tabs,
 } from "@mui/material";
+import { styled, alpha } from "@mui/material/styles";
+import Navbar from "../components/Navbar";
 
+// Custom TabPanel component
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
   return (
@@ -34,6 +37,75 @@ const TabPanel = (props) => {
   );
 };
 
+// Custom styled components
+const StyledContainer = styled(Container)(({ theme }) => ({
+  backgroundColor: "#E8F6FC", // Alice Blue for a clean background
+  padding: theme.spacing(4),
+  minHeight: "100vh",
+  fontFamily: "'Roboto', sans-serif", // Professional font
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  backgroundColor: "#FFFFFF", // White for crisp cards
+  padding: theme.spacing(3),
+  borderRadius: 12,
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)", // Subtle shadow
+  border: "1px solid #D0EAF4", // Columbia Blue border
+  transition: "box-shadow 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0 6px 16px rgba(0, 0, 0, 0.1)", // Lift on hover
+  },
+}));
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  "& .MuiTabs-indicator": {
+    backgroundColor: "#404E7C", // YInMn Blue for tab indicator
+  },
+  "& .MuiTab-root": {
+    textTransform: "none",
+    fontWeight: 500,
+    color: "#404E7C",
+    "&.Mui-selected": {
+      color: "#404E7C",
+      fontWeight: 600,
+    },
+  },
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#404E7C", // YInMn Blue for primary actions
+  color: "#FFFFFF",
+  padding: theme.spacing(1, 3),
+  borderRadius: 8,
+  textTransform: "none",
+  fontWeight: 600,
+  "&:hover": {
+    backgroundColor: alpha("#404E7C", 0.85), // Slightly lighter on hover
+    boxShadow: "0 2px 8px rgba(64, 78, 124, 0.2)",
+  },
+  "&:disabled": {
+    backgroundColor: "#D0EAF4", // Columbia Blue for disabled
+    color: "#666",
+  },
+}));
+
+const StyledSelect = styled(Select)(({ theme }) => ({
+  borderRadius: 8,
+  backgroundColor: "#F9FBFD",
+  "& .MuiSelect-select": {
+    color: "#404E7C",
+  },
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#D0EAF4", // Columbia Blue
+  },
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#A5D8F3", // Uranian Blue on hover
+  },
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#404E7C", // YInMn Blue when focused
+  },
+}));
+
 const NurseDashboard = () => {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -43,7 +115,7 @@ const NurseDashboard = () => {
   const [success, setSuccess] = useState(null);
   const [tabValue, setTabValue] = useState(0);
 
-  const API_BASE_URL = "http://192.168.109.73:3000";
+  const API_BASE_URL = "http://localhost:3000";
 
   useEffect(() => {
     fetchData();
@@ -113,177 +185,268 @@ const NurseDashboard = () => {
 
     try {
       setError(null);
-      const response = await axios.post(`${API_BASE_URL}/nurse/create-medical-record`, {
-        patientId: selectedPatient.Patient_ID,
-        doctorId: selectedDoctor
-      });
-      
+      const response = await axios.post(
+        `${API_BASE_URL}/nurse/create-medical-record`,
+        {
+          patientId: selectedPatient.Patient_ID,
+          doctorId: selectedDoctor,
+        }
+      );
       setSuccess(response.data.message);
       setSelectedPatient(null);
       setSelectedDoctor("");
     } catch (error) {
       console.error("Error creating medical record:", error);
-      const errorMessage = error.response?.data?.error || "Failed to create medical record. Please try again.";
+      const errorMessage =
+        error.response?.data?.error ||
+        "Failed to create medical record. Please try again.";
       setError(errorMessage);
     }
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          {success}
-        </Alert>
-      )}
+    <div>
+      <Navbar />
+      <StyledContainer maxWidth="lg">
+        {/* Alerts */}
+        {error && (
+          <Alert
+            severity="error"
+            sx={{
+              mb: 3,
+              borderRadius: 2,
+              backgroundColor: "#FFF1F1",
+              color: "#D32F2F",
+            }}
+          >
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert
+            severity="success"
+            sx={{
+              mb: 3,
+              borderRadius: 2,
+              backgroundColor: "#E8F5E9",
+              color: "#2E7D32",
+            }}
+          >
+            {success}
+          </Alert>
+        )}
 
-      <Paper elevation={3} sx={{ width: "100%", mb: 2 }}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs value={tabValue} onChange={handleTabChange} centered>
+        <StyledPaper sx={{ width: "100%", mb: 4 }}>
+          <StyledTabs value={tabValue} onChange={handleTabChange} centered>
             <Tab label="Assign Patient to Doctor" />
             <Tab label="Create Medical Record" />
-          </Tabs>
-        </Box>
+          </StyledTabs>
 
-        <Grid container spacing={3}>
-          {/* Patient List */}
-          <Grid item xs={12} md={4}>
-            <Paper elevation={3} sx={{ p: 2, height: "70vh", overflow: "auto" }}>
-              <Typography variant="h6" gutterBottom>
-                Patients
-              </Typography>
-              <List>
-                {patients.map((patient) => (
-                  <React.Fragment key={patient._id}>
-                    <ListItem
-                      onClick={() => handlePatientClick(patient)}
-                      selected={selectedPatient?._id === patient._id}
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      <ListItemText
-                        primary={patient.Name}
-                      />
-                    </ListItem>
-                    <Divider />
-                  </React.Fragment>
-                ))}
-              </List>
-            </Paper>
-          </Grid>
+          <Grid container spacing={4}>
+            {/* Patient List */}
+            <Grid item xs={12} md={4}>
+              <StyledPaper sx={{ height: "70vh", overflow: "auto" }}>
+                <Typography
+                  variant="h5"
+                  gutterBottom
+                  sx={{
+                    color: "#404E7C", // YInMn Blue
+                    fontWeight: 600,
+                    borderBottom: "2px solid #D0EAF4", // Columbia Blue
+                    pb: 1,
+                  }}
+                >
+                  Patient List
+                </Typography>
+                <List>
+                  {patients.map((patient) => (
+                    <React.Fragment key={patient._id}>
+                      <ListItem
+                        button
+                        onClick={() => handlePatientClick(patient)}
+                        selected={selectedPatient?._id === patient._id}
+                        sx={{
+                          borderRadius: 2,
+                          mb: 1,
+                          "&.Mui-selected": {
+                            backgroundColor: "#A5D8F3", // Uranian Blue
+                            "&:hover": { backgroundColor: "#A5D8F3" },
+                          },
+                          "&:hover": {
+                            backgroundColor: "#D0EAF4", // Columbia Blue
+                          },
+                          transition: "background-color 0.3s ease",
+                        }}
+                      >
+                        <ListItemText
+                          primary={patient.Name}
+                          primaryTypographyProps={{
+                            fontWeight: 500,
+                            color: "#404E7C",
+                          }}
+                        />
+                      </ListItem>
+                      <Divider sx={{ backgroundColor: "#D0EAF4" }} />
+                    </React.Fragment>
+                  ))}
+                </List>
+              </StyledPaper>
+            </Grid>
 
-          {/* Doctor Assignment/Medical Record Creation */}
-          <Grid item xs={12} md={8}>
-            <TabPanel value={tabValue} index={0}>
-              <Paper elevation={3} sx={{ p: 2, minHeight: "70vh" }}>
-                {selectedPatient ? (
-                  <Box>
-                    <Typography variant="h6" gutterBottom>
-                      Assign Patient to Doctor
-                    </Typography>
-                    <Typography gutterBottom>
-                      Selected Patient: {selectedPatient.Name}
-                    </Typography>
-                    <Box sx={{ my: 3 }}>
-                      <FormControl fullWidth>
-                        <InputLabel>Select Doctor</InputLabel>
-                        <Select
-                          value={selectedDoctor}
-                          onChange={handleDoctorChange}
-                          label="Select Doctor"
-                        >
-                          {doctors.map((doctor) => (
-                            <MenuItem key={doctor._id} value={doctor._id}>
-                              Dr. {doctor.Name} - {doctor.Specialization} (ID: {doctor.Doctor_ID})
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+            {/* Doctor Assignment/Medical Record Creation */}
+            <Grid item xs={12} md={8}>
+              <TabPanel value={tabValue} index={0}>
+                <StyledPaper sx={{ minHeight: "70vh" }}>
+                  {selectedPatient ? (
+                    <Box>
+                      <Typography
+                        variant="h5"
+                        gutterBottom
+                        sx={{
+                          color: "#404E7C",
+                          fontWeight: 600,
+                          borderBottom: "2px solid #D0EAF4",
+                          pb: 1,
+                        }}
+                      >
+                        Assign Patient to Doctor
+                      </Typography>
+                      <Typography
+                        gutterBottom
+                        sx={{ color: "#404E7C", fontWeight: 500 }}
+                      >
+                        Selected Patient: {selectedPatient.Name}
+                      </Typography>
+                      <Box sx={{ my: 4 }}>
+                        <FormControl fullWidth>
+                          <InputLabel
+                            sx={{ color: "#404E7C", fontWeight: 500 }}
+                          >
+                            Select Doctor
+                          </InputLabel>
+                          <StyledSelect
+                            value={selectedDoctor}
+                            onChange={handleDoctorChange}
+                            label="Select Doctor"
+                          >
+                            {doctors.map((doctor) => (
+                              <MenuItem
+                                key={doctor._id}
+                                value={doctor._id}
+                                sx={{ color: "#404E7C", fontWeight: 500 }}
+                              >
+                                Dr. {doctor.Name} - {doctor.Specialization} (ID:{" "}
+                                {doctor.Doctor_ID})
+                              </MenuItem>
+                            ))}
+                          </StyledSelect>
+                        </FormControl>
+                      </Box>
+                      <StyledButton
+                        onClick={handleAssignPatient}
+                        disabled={!selectedDoctor}
+                      >
+                        Assign Patient to Doctor
+                      </StyledButton>
                     </Box>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleAssignPatient}
-                      disabled={!selectedDoctor}
+                  ) : (
+                    <Box
+                      sx={{
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
                     >
-                      Assign Patient to Doctor
-                    </Button>
-                  </Box>
-                ) : (
-                  <Box
-                    sx={{
-                      height: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Typography variant="h6" color="textSecondary">
-                      Select a patient to assign to a doctor
-                    </Typography>
-                  </Box>
-                )}
-              </Paper>
-            </TabPanel>
-
-            <TabPanel value={tabValue} index={1}>
-              <Paper elevation={3} sx={{ p: 2, minHeight: "70vh" }}>
-                {selectedPatient ? (
-                  <Box>
-                    <Typography variant="h6" gutterBottom>
-                      Create Medical Record
-                    </Typography>
-                    <Typography gutterBottom>
-                      Selected Patient: {selectedPatient.Name}
-                    </Typography>
-                    <Box sx={{ my: 3 }}>
-                      <FormControl fullWidth>
-                        <InputLabel>Select Doctor</InputLabel>
-                        <Select
-                          value={selectedDoctor}
-                          onChange={handleDoctorChange}
-                          label="Select Doctor"
-                        >
-                          {doctors.map((doctor) => (
-                            <MenuItem key={doctor._id} value={doctor._id}>
-                              Dr. {doctor.Name} - {doctor.Specialization} (ID: {doctor.Doctor_ID})
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <Typography
+                        variant="h6"
+                        sx={{ color: "#404E7C", fontWeight: 500 }}
+                      >
+                        Select a patient to assign to a doctor
+                      </Typography>
                     </Box>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleCreateMedicalRecord}
-                      disabled={!selectedDoctor}
+                  )}
+                </StyledPaper>
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={1}>
+                <StyledPaper sx={{ minHeight: "70vh" }}>
+                  {selectedPatient ? (
+                    <Box>
+                      <Typography
+                        variant="h5"
+                        gutterBottom
+                        sx={{
+                          color: "#404E7C",
+                          fontWeight: 600,
+                          borderBottom: "2px solid #D0EAF4",
+                          pb: 1,
+                        }}
+                      >
+                        Create Medical Record
+                      </Typography>
+                      <Typography
+                        gutterBottom
+                        sx={{ color: "#404E7C", fontWeight: 500 }}
+                      >
+                        Selected Patient: {selectedPatient.Name}
+                      </Typography>
+                      <Box sx={{ my: 4 }}>
+                        <FormControl fullWidth>
+                          <InputLabel
+                            sx={{ color: "#404E7C", fontWeight: 500 }}
+                          >
+                            Select Doctor
+                          </InputLabel>
+                          <StyledSelect
+                            value={selectedDoctor}
+                            onChange={handleDoctorChange}
+                            label="Select Doctor"
+                          >
+                            {doctors.map((doctor) => (
+                              <MenuItem
+                                key={doctor._id}
+                                value={doctor._id}
+                                sx={{ color: "#404E7C", fontWeight: 500 }}
+                              >
+                                Dr. {doctor.Name} - {doctor.Specialization} (ID:{" "}
+                                {doctor.Doctor_ID})
+                              </MenuItem>
+                            ))}
+                          </StyledSelect>
+                        </FormControl>
+                      </Box>
+                      <StyledButton
+                        onClick={handleCreateMedicalRecord}
+                        disabled={!selectedDoctor}
+                      >
+                        Create Medical Record
+                      </StyledButton>
+                    </Box>
+                  ) : (
+                    <Box
+                      sx={{
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
                     >
-                      Create Medical Record
-                    </Button>
-                  </Box>
-                ) : (
-                  <Box
-                    sx={{
-                      height: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Typography variant="h6" color="textSecondary">
-                      Select a patient to create a medical record
-                    </Typography>
-                  </Box>
-                )}
-              </Paper>
-            </TabPanel>
+                      <Typography
+                        variant="h6"
+                        sx={{ color: "#404E7C", fontWeight: 500 }}
+                      >
+                        Select a patient to create a medical record
+                      </Typography>
+                    </Box>
+                  )}
+                </StyledPaper>
+              </TabPanel>
+            </Grid>
           </Grid>
-        </Grid>
-      </Paper>
-    </Container>
+        </StyledPaper>
+      </StyledContainer>
+    </div>
   );
 };
 

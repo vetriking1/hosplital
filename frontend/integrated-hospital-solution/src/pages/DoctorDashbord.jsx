@@ -14,15 +14,27 @@ import {
   CardContent,
   Alert,
   Button,
+  Avatar,
 } from "@mui/material";
 import Navbar from "../components/Navbar";
+import { MedicalInformation, Person, Description } from "@mui/icons-material";
 
 const DoctorDashboard = () => {
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = "http://192.168.109.73:3000";
+  const API_BASE_URL = "http://localhost:3000";
+
+  // Professional color palette
+  const colors = {
+    primary: "#2C3E50", // Dark Blue Gray
+    secondary: "#1ABC9C", // Emerald
+    background: "#ECF0F1", // Light Gray
+    card: "#FFFFFF", // White for contrast
+    text: "#2C3E50", // Dark text for readability
+    highlight: "#16A085", // Slightly darker Emerald for accents
+  };
 
   useEffect(() => {
     fetchPatients();
@@ -52,209 +64,132 @@ const DoctorDashboard = () => {
     }
   };
 
-  const viewPDF = async (reportId) => {
-    if (!reportId) {
-      setError("Report ID is missing");
-      return;
-    }
-
-    try {
-      console.log("Viewing PDF for report ID:", reportId);
-      const response = await axios.get(
-        `${API_BASE_URL}/user-dashboard/report-pdf/${reportId}`,
-        {
-          responseType: "blob", // Ensure binary response
-        }
-      );
-
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-
-      // Open in new tab
-      window.open(url);
-
-      // Cleanup URL after some time
-      setTimeout(() => {
-        window.URL.revokeObjectURL(url);
-      }, 10000);
-    } catch (error) {
-      console.error("Error viewing PDF:", error);
-      setError(
-        "Failed to view PDF: " +
-          (error.response?.data?.message || error.message)
-      );
-    }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        return "N/A";
-      }
-      return date.toLocaleDateString();
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "N/A";
-    }
-  };
-
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <div className="bg-[#E8F6FC] text-gray-800 font-sans">
       <Navbar />
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-      <Grid container spacing={3}>
-        {/* Patient List */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, height: "70vh", overflow: "auto" }}>
-            <Typography variant="h6" gutterBottom>
-              Patients
-            </Typography>
-            <List>
-              {patients.map((patient) => (
-                <React.Fragment key={patient._id}>
-                  <ListItem
-                    button
-                    onClick={() => handlePatientClick(patient._id)}
-                    selected={selectedPatient?._id === patient._id}
-                  >
-                    <ListItemText primary={patient.Name} />
-                  </ListItem>
-                  <Divider />
-                </React.Fragment>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
-
-        {/* Patient Details and Medical Records */}
-        <Grid item xs={12} md={8}>
-          {selectedPatient ? (
-            <Box>
-              {/* Patient Information */}
-              <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  Patient Information
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <strong>Name:</strong> {selectedPatient.Name}
-                    </Typography>
-                    <Typography>
-                      <strong>Age:</strong> {selectedPatient.Age}
-                    </Typography>
-                    <Typography>
-                      <strong>Gender:</strong> {selectedPatient.Gender}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <strong>Blood Group:</strong>{" "}
-                      {selectedPatient.Blood_Group}
-                    </Typography>
-                    <Typography>
-                      <strong>Contact:</strong> {selectedPatient.Contact_Number}
-                    </Typography>
-                    <Typography>
-                      <strong>Address:</strong> {selectedPatient.Address}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Paper>
-
-              {/* Medical Records */}
-              <Paper elevation={3} sx={{ p: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  Medical Records
-                </Typography>
-                <Grid container spacing={2}>
-                  {selectedPatient.Medical_History &&
-                  selectedPatient.Medical_History.length > 0 ? (
-                    selectedPatient.Medical_History.map((record) => (
-                      <Grid item xs={12} key={record._id}>
-                        <Card>
-                          <CardContent>
-                            {record.Test_Reports &&
-                              record.Test_Reports.length > 0 && (
-                                <Box mt={2}>
-                                  <Typography variant="subtitle1" gutterBottom>
-                                    <strong>Test Reports:</strong>
-                                  </Typography>
-                                  <Grid container spacing={2}>
-                                    {record.Test_Reports.map((report) => (
-                                      <Grid item xs={12} key={report._id}>
-                                        <Card variant="outlined">
-                                          <CardContent>
-                                            <Typography variant="subtitle2">
-                                              Test Name: {report.Test_Name}
-                                            </Typography>
-                                            <Typography
-                                              variant="body2"
-                                              color="textSecondary"
-                                            >
-                                              Date:{" "}
-                                              {formatDate(report.Test_Date)}
-                                            </Typography>
-                                            <Typography variant="body2">
-                                              Result: {report.Test_Result}
-                                            </Typography>
-                                            <Button
-                                              variant="contained"
-                                              color="primary"
-                                              size="small"
-                                              onClick={() =>
-                                                viewPDF(report._id)
-                                              }
-                                              sx={{ mt: 1 }}
-                                            >
-                                              View Report PDF
-                                            </Button>
-                                          </CardContent>
-                                        </Card>
-                                      </Grid>
-                                    ))}
-                                  </Grid>
-                                </Box>
-                              )}
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))
-                  ) : (
-                    <Grid item xs={12}>
-                      <Typography color="textSecondary" align="center">
-                        No medical records found for this patient
-                      </Typography>
-                    </Grid>
-                  )}
-                </Grid>
-              </Paper>
-            </Box>
-          ) : (
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 4 }}>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <Grid container spacing={3}>
+          {/* Patient List */}
+          <Grid item xs={12} md={4}>
             <Paper
-              elevation={3}
+              elevation={4}
               sx={{
                 p: 2,
                 height: "70vh",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                overflow: "auto",
+                backgroundColor: colors.card,
               }}
             >
-              <Typography variant="h6" color="textSecondary">
-                Select a patient to view their details
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{ color: colors.primary, fontWeight: "bold" }}
+              >
+                <MedicalInformation sx={{ mr: 1, verticalAlign: "middle" }} />
+                Patient List
               </Typography>
+              <List>
+                {patients.map((patient) => (
+                  <React.Fragment key={patient._id}>
+                    <ListItem
+                      button
+                      onClick={() => handlePatientClick(patient._id)}
+                      selected={selectedPatient?._id === patient._id}
+                      sx={{
+                        "&.Mui-selected": {
+                          backgroundColor: colors.secondary,
+                          color: "#fff",
+                        },
+                        "&:hover": {
+                          backgroundColor: colors.highlight,
+                          color: "#fff",
+                        },
+                        borderRadius: "8px",
+                        my: 1,
+                      }}
+                    >
+                      <Avatar sx={{ bgcolor: colors.primary, mr: 2 }}>
+                        {patient.Name.charAt(0)}
+                      </Avatar>
+                      <ListItemText
+                        primary={patient.Name}
+                        primaryTypographyProps={{ fontWeight: "medium" }}
+                      />
+                    </ListItem>
+                    <Divider />
+                  </React.Fragment>
+                ))}
+              </List>
             </Paper>
-          )}
+          </Grid>
+
+          {/* Patient Details and Medical Records */}
+          <Grid item xs={12} md={8}>
+            {selectedPatient ? (
+              <Box>
+                <Paper
+                  elevation={4}
+                  sx={{
+                    p: 3,
+                    mb: 3,
+                    backgroundColor: colors.card,
+                    borderLeft: `5px solid ${colors.primary}`,
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ color: colors.primary, fontWeight: "bold" }}
+                  >
+                    <Person sx={{ mr: 1, verticalAlign: "middle" }} />
+                    Patient Information
+                  </Typography>
+                  <Typography sx={{ mb: 1 }}>
+                    <strong>Name:</strong> {selectedPatient.Name}
+                  </Typography>
+                  <Typography sx={{ mb: 1 }}>
+                    <strong>Age:</strong> {selectedPatient.Age}
+                  </Typography>
+                  <Typography sx={{ mb: 1 }}>
+                    <strong>Gender:</strong> {selectedPatient.Gender}
+                  </Typography>
+                </Paper>
+              </Box>
+            ) : (
+              <Paper
+                elevation={4}
+                sx={{
+                  p: 4,
+                  height: "70vh",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textAlign: "center",
+                  backgroundColor: colors.card,
+                }}
+              >
+                <MedicalInformation
+                  sx={{
+                    fontSize: 60,
+                    color: colors.primary,
+                    mb: 2,
+                  }}
+                />
+                <Typography variant="h6" color="textSecondary">
+                  Select a patient from the list to view their medical details.
+                </Typography>
+              </Paper>
+            )}
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </div>
   );
 };
 

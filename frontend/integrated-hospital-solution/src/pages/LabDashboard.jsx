@@ -18,12 +18,104 @@ import {
   Select,
   MenuItem,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material/styles";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import Navbar from "../components/Navbar";
 
-const Input = styled("input")({
-  display: "none",
-});
+// Custom styled components for a professional look
+const StyledContainer = styled(Container)(({ theme }) => ({
+  backgroundColor: "#E8F6FC", // Alice Blue for a clean background
+  padding: theme.spacing(4),
+  minHeight: "100vh",
+  fontFamily: "'Roboto', sans-serif", // Professional font
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  backgroundColor: "#FFFFFF", // White for a crisp, professional card
+  padding: theme.spacing(3),
+  borderRadius: 12,
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)", // Subtle shadow for depth
+  border: "1px solid #D0EAF4", // Columbia Blue border for a soft outline
+  height: "100%",
+  transition: "box-shadow 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0 6px 16px rgba(0, 0, 0, 0.1)", // Slight lift on hover
+  },
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#404E7C", // YInMn Blue for primary actions
+  color: "#FFFFFF",
+  padding: theme.spacing(1, 3),
+  borderRadius: 8,
+  textTransform: "none", // Avoid uppercase for a modern look
+  fontWeight: 600,
+  "&:hover": {
+    backgroundColor: alpha("#404E7C", 0.85), // Slightly lighter on hover
+    boxShadow: "0 2px 8px rgba(64, 78, 124, 0.2)",
+  },
+  "&:disabled": {
+    backgroundColor: "#D0EAF4", // Columbia Blue for disabled state
+    color: "#666",
+  },
+}));
+
+const SecondaryButton = styled(Button)(({ theme }) => ({
+  borderColor: "#A5D8F3", // Uranian Blue for secondary buttons
+  color: "#404E7C", // YInMn Blue for text
+  padding: theme.spacing(1, 3),
+  borderRadius: 8,
+  textTransform: "none",
+  fontWeight: 500,
+  "&:hover": {
+    backgroundColor: "#A5D8F3", // Uranian Blue on hover
+    borderColor: "#404E7C",
+    color: "#404E7C",
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 8,
+    backgroundColor: "#F9FBFD", // Very light background for inputs
+    "& fieldset": {
+      borderColor: "#D0EAF4", // Columbia Blue for input borders
+    },
+    "&:hover fieldset": {
+      borderColor: "#A5D8F3", // Uranian Blue on hover
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "#404E7C", // YInMn Blue when focused
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: "#404E7C", // YInMn Blue for labels
+    fontWeight: 500,
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: "#404E7C",
+  },
+}));
+
+const StyledSelect = styled(Select)(({ theme }) => ({
+  borderRadius: 8,
+  backgroundColor: "#F9FBFD",
+  "& .MuiSelect-select": {
+    color: "#404E7C",
+  },
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#D0EAF4",
+  },
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#A5D8F3",
+  },
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#404E7C",
+  },
+}));
 
 const LabDashboard = () => {
   const [patients, setPatients] = useState([]);
@@ -37,7 +129,7 @@ const LabDashboard = () => {
   const [testResult, setTestResult] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
 
-  const API_BASE_URL = "http://192.168.109.73:3000";
+  const API_BASE_URL = "http://localhost:3000";
 
   useEffect(() => {
     fetchPatients();
@@ -50,7 +142,7 @@ const LabDashboard = () => {
       setPatients(response.data);
     } catch (error) {
       console.error("Error fetching patients:", error);
-      setError("Failed to fetch patients");
+      setError("Failed to fetch patients. Please try again.");
     }
   };
 
@@ -63,7 +155,7 @@ const LabDashboard = () => {
       setMedicalRecords(response.data);
     } catch (error) {
       console.error("Error fetching medical records:", error);
-      setError("Failed to fetch medical records");
+      setError("Failed to fetch medical records. Please try again.");
     }
   };
 
@@ -88,14 +180,14 @@ const LabDashboard = () => {
       setSelectedFile(file);
       setError(null);
     } else {
-      setError("Please select a PDF file");
+      setError("Please select a valid PDF file.");
       setSelectedFile(null);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile || !testName || !testResult || !selectedRecord) {
-      setError("Please fill in all fields and select a PDF file");
+      setError("Please fill in all fields and select a PDF file.");
       return;
     }
 
@@ -115,217 +207,341 @@ const LabDashboard = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setSuccess("Test report uploaded successfully");
+      setSuccess("Test report uploaded successfully.");
       setTestName("");
       setTestResult("");
       setSelectedFile(null);
       await fetchMedicalRecords(selectedPatient.Patient_ID);
     } catch (error) {
       console.error("Error uploading report:", error);
-      setError("Failed to upload test report");
+      setError("Failed to upload test report. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const viewPDF = async (reportId) => {
+    if (!reportId) {
+      setError("Report ID is missing.");
+      return;
+    }
+
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/lab/report-pdf/${reportId}`,
+        `${API_BASE_URL}/user-dashboard/report-pdf/${reportId}`,
         {
           responseType: "blob",
         }
       );
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
       window.open(url);
+      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
     } catch (error) {
       console.error("Error viewing PDF:", error);
-      setError("Failed to view PDF");
+      setError("Failed to view PDF. Please try again.");
     }
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          {success}
-        </Alert>
-      )}
-      <Grid container spacing={3}>
-        {/* Patient List */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, height: "70vh", overflow: "auto" }}>
-            <Typography variant="h6" gutterBottom>
-              Patients
-            </Typography>
-            <List>
-              {patients.map((patient) => (
-                <React.Fragment key={patient._id}>
-                  <ListItem
-                    button
-                    onClick={() => handlePatientClick(patient)}
-                    selected={selectedPatient?._id === patient._id}
-                  >
-                    <ListItemText
-                      primary={patient.Name}
-                      secondary={`ID: ${patient.Patient_ID}`}
-                    />
-                  </ListItem>
-                  <Divider />
-                </React.Fragment>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
+    <div>
+      <Navbar />
 
-        {/* Medical Records and Test Upload */}
-        <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{ p: 2, minHeight: "70vh" }}>
-            {selectedPatient ? (
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  Medical Records for {selectedPatient.Name}
-                </Typography>
+      <StyledContainer maxWidth="lg">
+        {/* Alerts */}
+        {error && (
+          <Alert
+            severity="error"
+            sx={{
+              mb: 3,
+              borderRadius: 2,
+              backgroundColor: "#FFF1F1",
+              color: "#D32F2F",
+            }}
+          >
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert
+            severity="success"
+            sx={{
+              mb: 3,
+              borderRadius: 2,
+              backgroundColor: "#E8F5E9",
+              color: "#2E7D32",
+            }}
+          >
+            {success}
+          </Alert>
+        )}
 
-                {/* Medical Records Selection */}
-                <FormControl fullWidth sx={{ mb: 3 }}>
-                  <InputLabel>Select Medical Record</InputLabel>
-                  <Select
-                    value={selectedRecord?._id || ""}
-                    onChange={(e) =>
-                      handleRecordSelect(
-                        medicalRecords.find((r) => r._id === e.target.value)
-                      )
-                    }
-                    label="Select Medical Record"
-                  >
-                    {medicalRecords.map((record) => (
-                      <MenuItem key={record._id} value={record._id}>
-                        Record ID: {record.Record_ID}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                {selectedRecord && (
-                  <Box>
-                    {/* Test Reports List */}
-                    {selectedRecord.Test_Reports &&
-                      selectedRecord.Test_Reports.length > 0 && (
-                        <Box sx={{ mb: 3 }}>
-                          <Typography variant="h6" gutterBottom>
-                            Existing Test Reports
-                          </Typography>
-                          <List>
-                            {selectedRecord.Test_Reports.map((report) => (
-                              <ListItem
-                                key={report._id}
-                                secondaryAction={
-                                  <Button
-                                    variant="outlined"
-                                    onClick={() => viewPDF(report._id)}
-                                  >
-                                    View PDF
-                                  </Button>
-                                }
-                              >
-                                <ListItemText
-                                  primary={report.Test_Name}
-                                  secondary={`Result: ${
-                                    report.Test_Result
-                                  } - Date: ${new Date(
-                                    report.Test_Date
-                                  ).toLocaleDateString()}`}
-                                />
-                              </ListItem>
-                            ))}
-                          </List>
-                        </Box>
-                      )}
-
-                    {/* Upload New Test Report */}
-                    <Typography variant="h6" gutterBottom>
-                      Upload New Test Report
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Test Name"
-                          value={testName}
-                          onChange={(e) => setTestName(e.target.value)}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Test Result"
-                          value={testResult}
-                          onChange={(e) => setTestResult(e.target.value)}
-                          multiline
-                          rows={3}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <label htmlFor="pdf-file">
-                          <Input
-                            accept="application/pdf"
-                            id="pdf-file"
-                            type="file"
-                            onChange={handleFileSelect}
-                          />
-                          <Button variant="outlined" component="span">
-                            Select PDF File
-                          </Button>
-                        </label>
-                        {selectedFile && (
-                          <Typography variant="body2" sx={{ mt: 1 }}>
-                            Selected file: {selectedFile.name}
-                          </Typography>
-                        )}
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Button
-                          variant="contained"
-                          onClick={handleUpload}
-                          disabled={
-                            loading || !selectedFile || !testName || !testResult
-                          }
-                        >
-                          {loading ? (
-                            <CircularProgress size={24} />
-                          ) : (
-                            "Upload Test Report"
-                          )}
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                )}
-              </Box>
-            ) : (
-              <Box
+        <Grid container spacing={4}>
+          {/* Patient List */}
+          <Grid item xs={12} md={4}>
+            <StyledPaper sx={{ height: "70vh", overflow: "auto" }}>
+              <Typography
+                variant="h5"
+                gutterBottom
                 sx={{
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  color: "#404E7C", // YInMn Blue for headers
+                  fontWeight: 600,
+                  borderBottom: "2px solid #D0EAF4", // Columbia Blue underline
+                  pb: 1,
                 }}
               >
-                <Typography variant="h6" color="textSecondary">
-                  Select a patient to manage test reports
-                </Typography>
-              </Box>
-            )}
-          </Paper>
+                Patient List
+              </Typography>
+              <List>
+                {patients.map((patient) => (
+                  <React.Fragment key={patient._id}>
+                    <ListItem
+                      button
+                      onClick={() => handlePatientClick(patient)}
+                      selected={selectedPatient?._id === patient._id}
+                      sx={{
+                        borderRadius: 2,
+                        mb: 1,
+                        "&.Mui-selected": {
+                          backgroundColor: "#A5D8F3", // Uranian Blue for selected
+                          "&:hover": { backgroundColor: "#A5D8F3" },
+                        },
+                        "&:hover": {
+                          backgroundColor: "#D0EAF4", // Columbia Blue on hover
+                        },
+                        transition: "background-color 0.3s ease",
+                      }}
+                    >
+                      <ListItemText
+                        primary={patient.Name}
+                        secondary={`ID: ${patient.Patient_ID}`}
+                        primaryTypographyProps={{
+                          fontWeight: 500,
+                          color: "#404E7C",
+                        }}
+                        secondaryTypographyProps={{
+                          color: "#666",
+                          fontSize: "0.85rem",
+                        }}
+                      />
+                    </ListItem>
+                    <Divider sx={{ backgroundColor: "#D0EAF4" }} />
+                  </React.Fragment>
+                ))}
+              </List>
+            </StyledPaper>
+          </Grid>
+
+          {/* Medical Records and Test Upload */}
+          <Grid item xs={12} md={8}>
+            <StyledPaper sx={{ minHeight: "70vh" }}>
+              {selectedPatient ? (
+                <Box>
+                  <Typography
+                    variant="h5"
+                    gutterBottom
+                    sx={{
+                      color: "#404E7C",
+                      fontWeight: 600,
+                      borderBottom: "2px solid #D0EAF4",
+                      pb: 1,
+                    }}
+                  >
+                    Medical Records for {selectedPatient.Name}
+                  </Typography>
+
+                  {/* Medical Records Selection */}
+                  <FormControl fullWidth sx={{ mb: 4 }}>
+                    <InputLabel sx={{ color: "#404E7C", fontWeight: 500 }}>
+                      Select Medical Record
+                    </InputLabel>
+                    <StyledSelect
+                      value={selectedRecord?._id || ""}
+                      onChange={(e) =>
+                        handleRecordSelect(
+                          medicalRecords.find((r) => r._id === e.target.value)
+                        )
+                      }
+                      label="Select Medical Record"
+                    >
+                      {medicalRecords.map((record) => (
+                        <MenuItem
+                          key={record._id}
+                          value={record._id}
+                          sx={{ color: "#404E7C", fontWeight: 500 }}
+                        >
+                          Record ID: {record.Record_ID}
+                        </MenuItem>
+                      ))}
+                    </StyledSelect>
+                  </FormControl>
+
+                  {selectedRecord && (
+                    <Box>
+                      {/* Test Reports List */}
+                      {selectedRecord.Test_Reports &&
+                        selectedRecord.Test_Reports.length > 0 && (
+                          <Box sx={{ mb: 4 }}>
+                            <Typography
+                              variant="h6"
+                              gutterBottom
+                              sx={{
+                                color: "#404E7C",
+                                fontWeight: 600,
+                                borderBottom: "1px solid #D0EAF4",
+                                pb: 1,
+                              }}
+                            >
+                              Existing Test Reports
+                            </Typography>
+                            <List>
+                              {selectedRecord.Test_Reports.map((report) => (
+                                <ListItem
+                                  key={report._id}
+                                  secondaryAction={
+                                    <IconButton
+                                      onClick={() => viewPDF(report._id)}
+                                      sx={{
+                                        color: "#404E7C",
+                                        "&:hover": { color: "#A5D8F3" },
+                                      }}
+                                    >
+                                      <VisibilityIcon />
+                                    </IconButton>
+                                  }
+                                  sx={{
+                                    borderBottom: "1px solid #E8F6FC",
+                                    py: 1.5,
+                                  }}
+                                >
+                                  <ListItemText
+                                    primary={report.Test_Name}
+                                    secondary={`Result: ${
+                                      report.Test_Result
+                                    } | Date: ${new Date(
+                                      report.Test_Date
+                                    ).toLocaleDateString()}`}
+                                    primaryTypographyProps={{
+                                      fontWeight: 500,
+                                      color: "#404E7C",
+                                    }}
+                                    secondaryTypographyProps={{
+                                      color: "#666",
+                                      fontSize: "0.85rem",
+                                    }}
+                                  />
+                                </ListItem>
+                              ))}
+                            </List>
+                          </Box>
+                        )}
+
+                      {/* Upload New Test Report */}
+                      <Typography
+                        variant="h6"
+                        gutterBottom
+                        sx={{
+                          color: "#404E7C",
+                          fontWeight: 600,
+                          borderBottom: "1px solid #D0EAF4",
+                          pb: 1,
+                        }}
+                      >
+                        Upload New Test Report
+                      </Typography>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                          <StyledTextField
+                            fullWidth
+                            label="Test Name"
+                            value={testName}
+                            onChange={(e) => setTestName(e.target.value)}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <StyledTextField
+                            fullWidth
+                            label="Test Result"
+                            value={testResult}
+                            onChange={(e) => setTestResult(e.target.value)}
+                            multiline
+                            rows={4}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <label htmlFor="pdf-file">
+                            <input
+                              accept="application/pdf"
+                              id="pdf-file"
+                              type="file"
+                              style={{ display: "none" }}
+                              onChange={handleFileSelect}
+                            />
+                            <SecondaryButton
+                              variant="outlined"
+                              startIcon={<CloudUploadIcon />}
+                              component="span"
+                            >
+                              Select PDF File
+                            </SecondaryButton>
+                          </label>
+                          {selectedFile && (
+                            <Typography
+                              variant="body2"
+                              sx={{ mt: 1, color: "#404E7C", fontWeight: 500 }}
+                            >
+                              Selected: {selectedFile.name}
+                            </Typography>
+                          )}
+                        </Grid>
+                        <Grid item xs={12}>
+                          <StyledButton
+                            onClick={handleUpload}
+                            disabled={
+                              loading ||
+                              !selectedFile ||
+                              !testName ||
+                              !testResult
+                            }
+                            startIcon={loading ? null : <CloudUploadIcon />}
+                          >
+                            {loading ? (
+                              <CircularProgress
+                                size={24}
+                                sx={{ color: "#FFF" }}
+                              />
+                            ) : (
+                              "Upload Test Report"
+                            )}
+                          </StyledButton>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+                </Box>
+              ) : (
+                <Box
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{ color: "#404E7C", fontWeight: 500 }}
+                  >
+                    Select a patient to manage test reports
+                  </Typography>
+                </Box>
+              )}
+            </StyledPaper>
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </StyledContainer>
+    </div>
   );
 };
 
